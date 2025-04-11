@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguimiento de Agendamiento para Portabilidad</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      background: linear-gradient(to right, #e0f7fa, #e0f2f1);
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #004d40;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #ffffffdd;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #b2dfdb;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background-color: #004d40;
+      color: white;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px;
+      margin: 5px 0;
+      box-sizing: border-box;
+      border: 1px solid #b2dfdb;
+      border-radius: 4px;
+    }
+    .form-container {
+      background-color: #ffffffcc;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .btn {
+      background-color: #26a69a;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background-color: #00796b;
+    }
+    .marca-agua {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.2);
+      font-weight: bold;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .filtros select,
+    .filtros input[type="text"] {
+      width: auto;
+      flex: 1;
+      min-width: 150px;
+    }
+    @media screen and (max-width: 600px) {
+      .form-container, .filtros {
+        padding: 10px;
+      }
+      table, th, td {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="marca-agua">Deiner Vallejos Lozano</div>
+
+  <h1>Seguimiento de Agendamiento para Portabilidad</h1>
+
+  <div class="form-container">
+    <h2>Registrar nuevo caso</h2>
+    <form id="portabilidadForm">
+      <label>Tienda:
+        <select id="tienda" required>
+          <option value="">Seleccionar</option>
+          <option>Franquicia Cusco - El Sol</option>
+          <option>Franquicia Huancayo RP II</option>
+          <option>Franquicia Ayacucho</option>
+          <option>Franquicia Huanuco Real Plaza</option>
+          <option>Franquicia Proceres</option>
+          <option>Franquicia Santa Anita</option>
+        </select>
+      </label>
+      <label>DNI Cliente: <input type="text" id="dni" required></label>
+      <label>Número de Contacto: <input type="text" id="contacto" required></label>
+      <label>Tipo de Caso:
+        <select id="tipo" required>
+          <option value="">Seleccionar</option>
+          <option>Línea suspendida por deuda</option>
+          <option>Cliente no cumple los 30 días de permanencia mínima</option>
+          <option>Cliente agendado</option>
+          <option>Cliente no cuenta con el chip activo, lo recupera para portar</option>
+          <option>Cliente quiere línea nueva, pero tiene prepagos activos en otro operador</option>
+        </select>
+      </label>
+      <label>Fecha de Atención: <input type="date" id="fechaAtencion" required></label>
+      <label>Fecha de Agendamiento: <input type="date" id="fechaAgendamiento" required></label>
+      <label>Estado de Agendamiento:
+        <select id="estado" required>
+          <option value="">Seleccionar</option>
+          <option>Porta concretada</option>
+          <option>Pendiente</option>
+          <option>En seguimiento</option>
+          <option>Desistió</option>
+        </select>
+      </label>
+      <label>Asesor(a): <input type="text" id="asesor"></label>
+      <label>Observación: <input type="text" id="observacion"></label>
+      <button class="btn" type="submit">Agregar Registro</button>
+    </form>
+    <button class="btn" onclick="descargarExcel()">Descargar en Excel</button>
+  </div>
+
+  <div class="filtros">
+    <label>Filtrar por Tienda:
+      <select id="filtroTienda">
+        <option value="">Todas</option>
+        <option>Franquicia Cusco - El Sol</option>
+        <option>Franquicia Huancayo RP II</option>
+        <option>Franquicia Ayacucho</option>
+        <option>Franquicia Huanuco Real Plaza</option>
+        <option>Franquicia Proceres</option>
+        <option>Franquicia Santa Anita</option>
+      </select>
+    </label>
+    <label>Filtrar por Estado:
+      <select id="filtroEstado">
+        <option value="">Todos</option>
+        <option>Porta concretada</option>
+        <option>Pendiente</option>
+        <option>En seguimiento</option>
+        <option>Desistió</option>
+      </select>
+    </label>
+    <label>Buscar por DNI:
+      <input type="text" id="buscarDni" placeholder="Escribe DNI...">
+    </label>
+  </div>
+
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Tienda</th>
+        <th>DNI Cliente</th>
+        <th>Contacto</th>
+        <th>Tipo de Caso</th>
+        <th>Fecha Atención</th>
+        <th>Fecha Agendamiento</th>
+        <th>Estado</th>
+        <th>Asesor(a)</th>
+        <th>Observación</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('portabilidadForm');
+      const tabla = document.querySelector('#tabla tbody');
+      const filtroTienda = document.getElementById('filtroTienda');
+      const filtroEstado = document.getElementById('filtroEstado');
+      const buscarDni = document.getElementById('buscarDni');
+
+      const datosGuardados = JSON.parse(localStorage.getItem('portabilidadDatos')) || [];
+      datosGuardados.forEach(agregarFila);
+      aplicarFiltros();
+
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const datos = [
+          'tienda', 'dni', 'contacto', 'tipo', 'fechaAtencion', 'fechaAgendamiento', 'estado', 'asesor', 'observacion'
+        ].map(id => document.getElementById(id).value);
+        agregarFila(datos);
+        guardarEnLocalStorage();
+        form.reset();
+        aplicarFiltros();
+      });
+
+      filtroTienda.addEventListener('change', aplicarFiltros);
+      filtroEstado.addEventListener('change', aplicarFiltros);
+      buscarDni.addEventListener('input', aplicarFiltros);
+
+      function agregarFila(datos) {
+        const fila = document.createElement('tr');
+        datos.forEach(dato => {
+          const celda = document.createElement('td');
+          celda.textContent = dato;
+          fila.appendChild(celda);
+        });
+        tabla.appendChild(fila);
+      }
+
+      function guardarEnLocalStorage() {
+        const filas = tabla.querySelectorAll('tr');
+        const datos = Array.from(filas).map(fila =>
+          Array.from(fila.querySelectorAll('td')).map(celda => celda.textContent)
+        );
+        localStorage.setItem('portabilidadDatos', JSON.stringify(datos));
+      }
+
+      function aplicarFiltros() {
+        const tienda = filtroTienda.value.toLowerCase();
+        const estado = filtroEstado.value.toLowerCase();
+        const dniTexto = buscarDni.value.trim().toLowerCase();
+
+        const filas = tabla.querySelectorAll('tr');
+
+        filas.forEach(fila => {
+          const celdas = fila.querySelectorAll('td');
+          if (!celdas.length) return;
+          const tiendaFila = celdas[0].textContent.toLowerCase();
+          const dniFila = celdas[1].textContent.toLowerCase();
+          const estadoFila = celdas[6].textContent.toLowerCase();
+
+          const visible =
+            (!tienda || tiendaFila === tienda) &&
+            (!estado || estadoFila === estado) &&
+            (!dniTexto || dniFila.includes(dniTexto));
+
+          fila.style.display = visible ? '' : 'none';
+        });
+      }
+
+      window.descargarExcel = function () {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        const filas = document.querySelectorAll("table tr");
+        filas.forEach(fila => {
+          let filaData = [];
+          fila.querySelectorAll("td, th").forEach(celda => {
+            filaData.push(celda.textContent);
+          });
+          csvContent += filaData.join(",") + "\r\n";
+        });
+
+        const today = new Date();
+        const fecha = today.toISOString().split('T')[0];
+        const nombreArchivo = `seguimiento_portabilidad_${fecha}.csv`;
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", nombreArchivo);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    });
+  </script>
+</body>
+</html>
