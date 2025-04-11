@@ -144,9 +144,11 @@
           <option>Desistió</option>
         </select>
       </label>
-      <label>Asesor(a): <input type="text" id="asesor"></label>
+      <label>Asesor(a): <input type="text" id="asesor" placeholder="Apellido(s) y nombre(s)"></label>
       <label>Observación: <input type="text" id="observacion"></label>
       <button class="btn" type="submit">Agregar Registro</button>
+    <div id="mensajeExito" style="color: green; font-weight: bold; display: none; margin-top: 10px;">✔ Registro agregado correctamente</div>
+      <button class="btn" type="button" onclick="document.getElementById('portabilidadForm').reset()">Limpiar Campos</button>
     </form>
     <button class="btn" onclick="descargarExcel()">Descargar en Excel</button>
   </div>
@@ -225,6 +227,9 @@
         agregarFila(datos);
         guardarEnLocalStorage();
         form.reset();
+        const mensaje = document.getElementById('mensajeExito');
+        mensaje.style.display = 'block';
+        setTimeout(() => mensaje.style.display = 'none', 3000);
         aplicarFiltros();
       });
 
@@ -274,21 +279,24 @@
       }
 
       window.descargarExcel = function () {
-        let csvContent = "data:text/csv;charset=utf-8,";
+        let csvContent = "﻿"; // BOM para compatibilidad con Excel
         const filas = document.querySelectorAll("table tr");
         filas.forEach(fila => {
           let filaData = [];
           fila.querySelectorAll("td, th").forEach(celda => {
-            filaData.push(celda.textContent);
+            let texto = celda.textContent.replace(/
+/g, '').replace(/"/g, '""');
+            filaData.push(`"${texto}"`); // Encerrar en comillas dobles para que respete separaciones
           });
-          csvContent += filaData.join(",") + "\r\n";
+          csvContent += filaData.join(",") + "
+";
         });
 
         const today = new Date();
         const fecha = today.toISOString().split('T')[0];
         const nombreArchivo = `seguimiento_portabilidad_${fecha}.csv`;
 
-        const encodedUri = encodeURI(csvContent);
+        const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", nombreArchivo);
@@ -300,4 +308,3 @@
   </script>
 </body>
 </html>
-
