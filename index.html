@@ -230,8 +230,6 @@
         mensaje.style.display = 'block';
         setTimeout(() => mensaje.style.display = 'none', 3000);
         form.reset();
-        mensaje.style.display = 'block';
-        setTimeout(() => mensaje.style.display = 'none', 3000);
         aplicarFiltros();
       });
 
@@ -250,7 +248,7 @@
       }
 
       function guardarEnLocalStorage() {
-        const filas = tabla.querySelectorAll('tr');
+        const filas = tabla.querySelectorAll('tbody tr');
         const datos = Array.from(filas).map(fila =>
           Array.from(fila.querySelectorAll('td')).map(celda => celda.textContent)
         );
